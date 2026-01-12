@@ -1,20 +1,12 @@
 import sqlite3
-
-DB_PATH = "nutrichoach.db"
-
-
-def get_connection():
-    conn = sqlite3.connect(DB_PATH)
-    return conn
+from config import DB_PATH
 
 
-def create_tables():
-    conn = get_connection()
-
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
+def create_table():
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
         CREATE TABLE IF NOT EXISTS ingredients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -27,7 +19,4 @@ def create_tables():
             fibre_g REAL
         )
     """
-    )
-
-    conn.commit()
-    conn.close()
+        )

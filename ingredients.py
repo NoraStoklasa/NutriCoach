@@ -1,8 +1,6 @@
 import requests
-from config import USDA_API_KEY
-from database import get_connection
-
-USDA_SEARCH_URL = "https://api.nal.usda.gov/fdc/v1/foods/search"
+from config import USDA_API_KEY, USDA_SEARCH_URL
+from database import create_table
 
 
 def search_ingredient(ingredient_name):
@@ -32,7 +30,7 @@ def search_ingredient(ingredient_name):
 def extract_nutrients(food_data):
     """Extract relevant nutrients from food data (searched food item) returned by USDA API"""
 
-    # Map nutrient ID to database columns
+    # Nutrient map of IDs to database columns
     nutrient_map = {
         1062: "energy_kj",  # Energy, kJ
         1003: "protein_g",  # Protein
