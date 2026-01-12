@@ -1,0 +1,6 @@
+config.py
+nutricoach.db
+.venv/
+__pycache__/
+*.pyc
+.env
