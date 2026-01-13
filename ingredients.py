@@ -10,7 +10,7 @@ def search_ingredient(ingredient_name):
         "query": ingredient_name,
         "api_key": USDA_API_KEY,
         "pageSize": 1,  # number of results
-        "dataType": ["Foundation", "SR Legacy"],
+        "dataType": ["Foundation", "SR Legacy", "Branded"],  # types of data to include
     }
 
     # send request
@@ -27,28 +27,92 @@ def search_ingredient(ingredient_name):
 
 
 def extract_nutrients(food_data):
-    """Extract relevant nutrients from food data (searched food item) returned by USDA API"""
+    """
+    Decide how to extract nutrients based on USDA data type
+    """
+    data_type = food_data.get("dataType")
 
-    # Nutrient map of IDs to database columns
+    if data_type in ("Foundation", "SR Legacy"):
+        return extract_nutrients_foundation(food_data)
+
+    if data_type == "Branded":
+        return extract_nutrients_branded(food_data)
+
+    return {}
+
+
+def extract_nutrients_foundation(food_data):
+    """Extract nutrients from Foundation or SR Legacy foods"""
+
     nutrient_map = {
-        1062: "energy_kj",  # Energy, kJ
+        1062: "energy_kj",  # Energy (kJ)
+        1087: "energy_kcal",  # Energy (kcal) - need to convert
         1003: "protein_g",  # Protein
-        1005: "carbs_g",  # Carbohydrate, by difference
-        1004: "fat_g",  # Total lipid (fat)
-        1079: "fibre_g",  # Fiber, total dietary
+        1005: "carbs_g",  # Carbohydrate
+        1004: "fat_g",  # Fat
+        1079: "fibre_g",  # Fibre
     }
 
-    nutrients = {}
+    nutrients = {
+        "energy_kj": None,
+        "protein_g": None,
+        "carbs_g": None,
+        "fat_g": None,
+        "fibre_g": None,
+    }
 
-    # Extract the nutrients from the food data list
-    for nutrient in food_data.get(
-        "foodNutrients", []
-    ):  # foodNutrients is a list of dicts of nutrients for the ingredient, else return empty list to prevent errors
+    for nutrient in food_data.get("foodNutrients", []):
         nutrient_id = nutrient.get("nutrientId")
+        value = nutrient.get("value")
         if nutrient_id in nutrient_map:
-            nutrients[nutrient_map[nutrient_id]] = nutrient.get(
-                "value"
-            )  # getting the id's value=column name and the value for the key
+            if nutrient_id == 1087:  # Convert kcal to kJ
+                nutrients["energy_kj"] = value * 4.184 if value else None
+            elif nutrient_id == 1062:
+                nutrients["energy_kj"] = value
+            else:
+                nutrients[nutrient_map[nutrient_id]] = value
+
+    return nutrients
+
+
+def extract_nutrients_branded(food_data):
+    """Extract nutrients from Branded foods"""
+
+    nutrients = {
+        "energy_kj": None,
+        "protein_g": None,
+        "carbs_g": None,
+        "fat_g": None,
+        "fibre_g": None,
+    }
+
+    starch = None
+    sugars = None
+
+    for nutrient in food_data.get("foodNutrients", []):
+        nutrient_id = nutrient.get("nutrientId")
+        value = nutrient.get("value")
+
+        if nutrient_id == 1062:  # Energy (kJ)
+            nutrients["energy_kj"] = value
+        elif nutrient_id == 1087:  # Energy (kcal) - convert to kJ
+            nutrients["energy_kj"] = value * 4.184 if value else None
+        elif nutrient_id == 1003:  # Protein
+            nutrients["protein_g"] = value
+        elif nutrient_id == 1004:  # Fat
+            nutrients["fat_g"] = value
+        elif nutrient_id == 1005:  # Carbohydrate
+            nutrients["carbs_g"] = value
+        elif nutrient_id == 1079:  # Fibre
+            nutrients["fibre_g"] = value
+        elif nutrient_id == 1009:  # Starch
+            starch = value
+        elif nutrient_id == 2000:  # Total sugars
+            sugars = value
+
+    # Build carbs if missing
+    if nutrients.get("carbs_g") is None:
+        nutrients["carbs_g"] = (starch or 0) + (sugars or 0)
 
     return nutrients
 
