@@ -46,7 +46,7 @@ def extract_nutrients_foundation(food_data):
 
     nutrient_map = {
         1062: "energy_kj",  # Energy (kJ)
-        1087: "energy_kcal",  # Energy (kcal) - need to convert
+        1008: "energy_kcal",  # Energy (kcal) - need to convert
         1003: "protein_g",  # Protein
         1005: "carbs_g",  # Carbohydrate
         1004: "fat_g",  # Fat
@@ -65,8 +65,8 @@ def extract_nutrients_foundation(food_data):
         nutrient_id = nutrient.get("nutrientId")
         value = nutrient.get("value")
         if nutrient_id in nutrient_map:
-            if nutrient_id == 1087:  # Convert kcal to kJ
-                nutrients["energy_kj"] = value * 4.184 if value else None
+            if nutrient_id == 1008:  # Convert kcal to kJ
+                nutrients["energy_kj"] = value * 4.184 if value is not None else None
             elif nutrient_id == 1062:
                 nutrients["energy_kj"] = value
             else:
@@ -89,14 +89,20 @@ def extract_nutrients_branded(food_data):
     starch = None
     sugars = None
 
+    # Debug: print available nutrient IDs
+    print(
+        "Available nutrient IDs:",
+        [n.get("nutrientId") for n in food_data.get("foodNutrients", [])],
+    )
+
     for nutrient in food_data.get("foodNutrients", []):
         nutrient_id = nutrient.get("nutrientId")
         value = nutrient.get("value")
 
         if nutrient_id == 1062:  # Energy (kJ)
             nutrients["energy_kj"] = value
-        elif nutrient_id == 1087:  # Energy (kcal) - convert to kJ
-            nutrients["energy_kj"] = value * 4.184 if value else None
+        elif nutrient_id == 1008:  # Energy (kcal) - convert to kJ
+            nutrients["energy_kj"] = value * 4.184 if value is not None else None
         elif nutrient_id == 1003:  # Protein
             nutrients["protein_g"] = value
         elif nutrient_id == 1004:  # Fat
@@ -113,6 +119,8 @@ def extract_nutrients_branded(food_data):
     # Build carbs if missing
     if nutrients.get("carbs_g") is None:
         nutrients["carbs_g"] = (starch or 0) + (sugars or 0)
+    if nutrients.get("fibre_g") is None:
+        nutrients["fibre_g"] = 0.0
 
     return nutrients
 

@@ -14,3 +14,27 @@ raspberry_cheesecake = {
         "Pour the raspberry mixture on top of the yoghurt-ricotta layer.",
     ],
 }
+
+beef_mince_in_tomatoe_sauce_with_pasta = {
+    "name": "Beef Mince in Tomato Sauce with Pasta",
+    "ingredients": [
+        {"name": "Beef Mince 5% Fat", "portion_g": 90},
+        {"name": "Spaghetti uncooked", "portion_g": 60},
+        {"name": "Tomato Passata", "portion_g": 130},
+        {"name": "Olive Oil", "portion_g": 5},
+        {"name": "Brown Onion Raw", "portion_g": 20},
+        {"name": "Garlic Clove Raw", "portion_g": 3},
+        {"name": "Zucchini Raw", "portion_g": 150},
+        {"name": "Parmesan Cheese Grated", "portion_g": 20},
+    ],
+    "instructions": [
+        "Cook the spaghetti according to the packet instructions.",
+        "Grate the zucchini or spiralise it into spaghetti-style strands.",
+        "Lightly sauté the onion in olive oil.",
+        "Add the beef mince and garlic, then cook until browned.",
+        "Stir in the zucchini and herbs (salt, pepper, oregano).",
+        "Add the tomato passata and a little water.",
+        "Simmer for 5–10 minutes.",
+        "Serve the sauce over the spaghetti and top with parmesan.",
+    ],
+}
