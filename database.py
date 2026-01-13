@@ -26,12 +26,12 @@ def create_table():
 def insert_ingredient_information(
     name, usda_food_id, portion_g, energy_kj, protein_g, carbs_g, fat_g, fibre_g
 ):
-    """Insert ingredient information into the database"""
+    """Insert or update ingredient information in the database"""
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute(
             """
-    INSERT INTO ingredients (name, usda_food_id, portion_g, energy_kj, protein_g, carbs_g, fat_g, fibre_g)
+    INSERT OR REPLACE INTO ingredients (name, usda_food_id, portion_g, energy_kj, protein_g, carbs_g, fat_g, fibre_g)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """,
             (
