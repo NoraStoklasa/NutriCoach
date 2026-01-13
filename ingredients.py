@@ -1,6 +1,5 @@
 import requests
 from config import USDA_API_KEY, USDA_SEARCH_URL
-from database import create_table
 
 
 def search_ingredient(ingredient_name):
@@ -68,3 +67,8 @@ def extract_portion(food_data):
 
     # Default to 100g if no measure found
     return 100.0
+
+
+def extract_usda_food_id(food_data):
+    """Extract USDA FoodData Central ID from food data."""
+    return food_data.get("fdcId")

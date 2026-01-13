@@ -3,6 +3,7 @@ from config import DB_PATH
 
 
 def create_table():
+    """Create the ingredients table in the database if it doesn't exist"""
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute(
@@ -19,4 +20,28 @@ def create_table():
             fibre_g REAL
         )
     """
+        )
+
+
+def insert_ingredient_information(
+    name, usda_food_id, portion_g, energy_kj, protein_g, carbs_g, fat_g, fibre_g
+):
+    """Insert ingredient information into the database"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+    INSERT INTO ingredients (name, usda_food_id, portion_g, energy_kj, protein_g, carbs_g, fat_g, fibre_g)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """,
+            (
+                name,
+                usda_food_id,
+                portion_g,
+                energy_kj,
+                protein_g,
+                carbs_g,
+                fat_g,
+                fibre_g,
+            ),
         )
