@@ -10,14 +10,14 @@ also scale ingredient grams so a recipe hits a target energy value (kJ).
 - Calculates recipe totals by combining ingredient nutrients.
 - Optionally scales a recipe to reach a target energy value.
 
-## How it works (short)
+## How it works
 
 - A recipe lists ingredient names and grams (`portion_g`).
 - Each ingredient in the database stores nutrients per 100g (or per serving).
 - Recipe totals are calculated by scaling each ingredient’s nutrients by its grams.
 - If you set a target energy, ingredient grams are scaled by one factor.
 
-## Project files (beginner guide)
+## Project files
 
 - `main.py`
 
