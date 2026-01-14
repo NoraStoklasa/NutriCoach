@@ -1,3 +1,5 @@
+"""Functions to interact with the USDA FoodData Central API to search for ingredients and extract nutrient information"""
+
 import requests
 from config import USDA_API_KEY, USDA_SEARCH_URL
 
@@ -41,6 +43,17 @@ def extract_nutrients(food_data):
     return {}
 
 
+def _ensure_energy_kj(nutrients):
+    if nutrients.get("energy_kj") is None:
+        protein_g = nutrients.get("protein_g") or 0
+        carbs_g = nutrients.get("carbs_g") or 0
+        fat_g = nutrients.get("fat_g") or 0
+        fibre_g = nutrients.get("fibre_g") or 0
+        nutrients["energy_kj"] = (
+            protein_g * 17 + carbs_g * 17 + fat_g * 37 + fibre_g * 8
+        )
+
+
 def extract_nutrients_foundation(food_data):
     """Extract nutrients from Foundation or SR Legacy foods"""
 
@@ -72,6 +85,7 @@ def extract_nutrients_foundation(food_data):
             else:
                 nutrients[nutrient_map[nutrient_id]] = value
 
+    _ensure_energy_kj(nutrients)
     return nutrients
 
 
@@ -88,12 +102,6 @@ def extract_nutrients_branded(food_data):
 
     starch = None
     sugars = None
-
-    # Debug: print available nutrient IDs
-    print(
-        "Available nutrient IDs:",
-        [n.get("nutrientId") for n in food_data.get("foodNutrients", [])],
-    )
 
     for nutrient in food_data.get("foodNutrients", []):
         nutrient_id = nutrient.get("nutrientId")
@@ -116,11 +124,12 @@ def extract_nutrients_branded(food_data):
         elif nutrient_id == 2000:  # Total sugars
             sugars = value
 
-    # Build carbs if missing
+    # Build carbs, fibre and energy_kj if missing
     if nutrients.get("carbs_g") is None:
         nutrients["carbs_g"] = (starch or 0) + (sugars or 0)
     if nutrients.get("fibre_g") is None:
         nutrients["fibre_g"] = 0.0
+    _ensure_energy_kj(nutrients)
 
     return nutrients
 

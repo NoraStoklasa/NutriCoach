@@ -2,8 +2,8 @@ raspberry_cheesecake = {
     "name": "Raspberry Cheesecake",
     "ingredients": [
         {"name": "Belvita Chocolate Breakfast Biscuits", "portion_g": 25},
-        {"name": "Yoghurt Greek Style Danone YoPro", "portion_g": 80},
-        {"name": "Ricotta cheese", "portion_g": 70},
+        {"name": "YoPRO Danone High Protein Yoghurt Vanilla", "portion_g": 80},
+        {"name": "Ricotta cheese light", "portion_g": 70},
         {"name": "Raspberries Frozen", "portion_g": 100},
         {"name": "Chia Seeds Dried", "portion_g": 3},
     ],
@@ -18,7 +18,7 @@ raspberry_cheesecake = {
 beef_mince_in_tomatoe_sauce_with_pasta = {
     "name": "Beef Mince in Tomato Sauce with Pasta",
     "ingredients": [
-        {"name": "Beef Mince 5% Fat", "portion_g": 90},
+        {"name": "Beef Mince 5% Fat", "portion_g": 150},
         {"name": "Spaghetti uncooked", "portion_g": 60},
         {"name": "Tomato Passata", "portion_g": 130},
         {"name": "Olive Oil", "portion_g": 5},

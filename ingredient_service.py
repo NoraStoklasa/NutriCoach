@@ -1,3 +1,5 @@
+"""Service to synchronize recipe ingredients with the local database and USDA database"""
+
 from ingredients import (
     search_ingredient,
     extract_nutrients,
@@ -10,8 +12,8 @@ from database import (
 )
 
 
-def sync_recipe_ingredients(recipe):
-    """Ensure all recipe ingredients exist in the local database if not search USDA and insert them"""
+def ensure_recipe_ingredients_exist(recipe):
+    """Ensure all recipe ingredients exist in the local database by name only"""
 
     for ingredient in recipe["ingredients"]:
         name = ingredient["name"]
@@ -22,27 +24,5 @@ def sync_recipe_ingredients(recipe):
             print("-----")
             continue
 
-        # Fetch from USDA
-        food = search_ingredient(name)
-        if not food:
-            print(f"Ingredient '{name}' not found in USDA database.")
-            print("-----")
-            continue
-
-        nutrients = extract_nutrients(food)
-        portion = extract_portion(food)
-        usda_id = extract_usda_food_id(food)
-
-        insert_ingredient_information(
-            name=name,
-            usda_food_id=usda_id,
-            portion_g=portion,
-            energy_kj=nutrients["energy_kj"],
-            protein_g=nutrients["protein_g"],
-            carbs_g=nutrients["carbs_g"],
-            fat_g=nutrients["fat_g"],
-            fibre_g=nutrients["fibre_g"],
-        )
-
-        print(f"Ingredient '{name}' added to database.")
+        print(f"Ingredient '{name}' not found in database. Skipping.")
         print("-----")

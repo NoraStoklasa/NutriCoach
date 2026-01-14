@@ -1,3 +1,5 @@
+"""Database interaction functions for ingredients"""
+
 import sqlite3
 from config import DB_PATH
 

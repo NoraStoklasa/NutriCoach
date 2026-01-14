@@ -1,4 +1,5 @@
-from recipe import raspberry_cheesecake, beef_mince_in_tomatoe_sauce_with_pasta
+"""Recalculate nutrients for recipes based on their ingredients"""
+
 from database import extract_ingredient_by_name
 
 
@@ -31,20 +32,22 @@ def recalculate_nutrients(recipe):
         fibre_g = ingredient_info[8]
 
         # Calculate scaling factor
-        if portion__g > 0:
+        if portion__g:
             scale = portion_g / portion__g
         else:
             scale = 0
 
         # Update total nutrients
-        total_nutrients["energy_kj"] += energy_kj * scale
-        total_nutrients["protein_g"] += protein_g * scale
-        total_nutrients["carbs_g"] += carbs_g * scale
-        total_nutrients["fat_g"] += fat_g * scale
-        total_nutrients["fibre_g"] += fibre_g * scale
+        total_nutrients["energy_kj"] += (energy_kj or 0) * scale
+        total_nutrients["protein_g"] += (protein_g or 0) * scale
+        total_nutrients["carbs_g"] += (carbs_g or 0) * scale
+        total_nutrients["fat_g"] += (fat_g or 0) * scale
+        total_nutrients["fibre_g"] += (fibre_g or 0) * scale
 
-    return total_nutrients
-
-
-# print(recalculate_nutrients(raspberry_cheesecake))
-print(recalculate_nutrients(beef_mince_in_tomatoe_sauce_with_pasta))
+    return {
+        "energy_kj": int(round(total_nutrients["energy_kj"])),
+        "protein_g": round(total_nutrients["protein_g"], 2),
+        "carbs_g": round(total_nutrients["carbs_g"], 2),
+        "fat_g": round(total_nutrients["fat_g"], 2),
+        "fibre_g": round(total_nutrients["fibre_g"], 2),
+    }
