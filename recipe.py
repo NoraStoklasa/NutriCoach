@@ -38,3 +38,15 @@ beef_mince_in_tomatoe_sauce_with_pasta = {
         "Serve the sauce over the spaghetti and top with parmesan.",
     ],
 }
+
+
+egg_spread = {
+    "name": "Egg Spread",
+    "ingredients": [
+        {"name": "Cottage cheese non fat", "portion_g": 100},
+        {"name": "Hard Boiled Egg", "portion_g": 100},
+    ],
+    "instructions": [
+        "Mix the cottage cheese and chopped hard boiled egg together. Add salt and pepper to taste. Serve on whole grain bread or crackers.",
+    ],
+}
