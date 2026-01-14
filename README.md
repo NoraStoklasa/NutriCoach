@@ -9,6 +9,7 @@ also scale ingredient grams so a recipe hits a target energy value (kJ).
 - Stores ingredients in a local database (`nutrichoach.db`).
 - Calculates recipe totals by combining ingredient nutrients.
 - Optionally scales a recipe to reach a target energy value.
+- Can gently adjust macros after scaling (protein, carbs, fibre minimum).
 
 ## How it works
 
@@ -16,6 +17,9 @@ also scale ingredient grams so a recipe hits a target energy value (kJ).
 - Each ingredient in the database stores nutrients per 100g (or per serving).
 - Recipe totals are calculated by scaling each ingredient’s nutrients by its grams.
 - If you set a target energy, ingredient grams are scaled by one factor.
+- Macro adjustment is optional and uses soft targets for protein/carbs and a
+  minimum fibre threshold. Fat is only changed indirectly.
+- Ingredient grams are rounded to whole numbers when scaling or adjusting.
 
 ## Project files
 
@@ -60,7 +64,10 @@ also scale ingredient grams so a recipe hits a target energy value (kJ).
 - `scaled_recipe.py`
   - This is used when you want a recipe to hit a specific energy target.
   - `scale_recipe_to_energy(recipe, target_energy_kj)` returns a new recipe
-    with grams scaled to reach the target energy.
+    with grams scaled to reach the target energy, plus recalculated totals.
+  - `adjust_recipe_macros(recipe, macro_targets, max_iterations=3)` nudges
+    ingredient grams for optional macro targets and returns the adjusted recipe,
+    totals, and macro differences.
 
 ## Key calculations
 
@@ -70,3 +77,21 @@ also scale ingredient grams so a recipe hits a target energy value (kJ).
   `protein_g*17 + carbs_g*17 + fat_g*37 + fibre_g*8`
 - Target scaling for a recipe:
   `scale = target_energy_kj / current_energy_kj`
+
+## Macro adjustment targets
+
+Use a dictionary like this when calling `adjust_recipe_macros(...)`:
+
+```python
+macro_targets = {
+    "protein_g": 40,      # optional
+    "carbs_g": 65,        # optional
+    "fibre_min_g": 10,    # minimum only
+}
+```
+
+Notes:
+
+- Only macros you provide are optimized.
+- Fibre is treated as a minimum threshold, not a strict target.
+- Energy is not rescaled during macro adjustment.

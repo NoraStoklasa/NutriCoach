@@ -1,15 +1,6 @@
 """Service to synchronize recipe ingredients with the local database and USDA database"""
 
-from ingredients import (
-    search_ingredient,
-    extract_nutrients,
-    extract_portion,
-    extract_usda_food_id,
-)
-from database import (
-    insert_ingredient_information,
-    extract_ingredient_by_name,
-)
+from database import extract_ingredient_by_name
 
 
 def ensure_recipe_ingredients_exist(recipe):
