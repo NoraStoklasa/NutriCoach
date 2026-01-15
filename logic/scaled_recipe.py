@@ -1,7 +1,7 @@
 """Utilities for scaling recipes to a target energy."""
 
 from copy import deepcopy
-from recalculate_nutrients import recalculate_nutrients
+from .recalculate_nutrients import recalculate_nutrients
 
 
 def scale_recipe_to_energy(recipe, target_energy_kj):

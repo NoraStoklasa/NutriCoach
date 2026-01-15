@@ -1,4 +1,4 @@
-from database import insert_ingredient_information
+from .database import insert_ingredient_information
 
 
 def add_ingredient_manually(

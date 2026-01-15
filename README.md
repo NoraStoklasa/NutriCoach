@@ -71,29 +71,23 @@ NutriCoach is a **calculation and data tool**, not an AI nutrition advisor.
 
 ## Project structure
 
-- `database.py`
-  Handles all SQLite database operations
+- `ingredients/`
+  Ingredient data access, USDA fetch, and manual ingredient input.
+  - `database.py` handles SQLite operations
+  - `ingredients.py` fetches and parses USDA FoodData Central data
+  - `ingredient_service.py` ensures recipe ingredients exist in the local database
+  - `manual_ingredient.py` adds or updates ingredients manually
+  - `units.py` optional human-friendly unit display (display only)
 
-- `ingredients.py`
-  Fetches and parses nutrition data from the USDA FoodData Central API
+- `recipes/`
+  Recipe persistence and example recipes.
+  - `recipe_database.py` stores recipes and their ingredients
+  - `recipe.py` example recipe definitions
 
-- `ingredient_service.py`
-  Ensures recipe ingredients exist in the local database
-
-- `manual_ingredient.py`
-  Allows manual addition of ingredients by the nutritionist
-
-- `recalculate_nutrients.py`
-  Calculates total recipe nutrition
-
-- `scaled_recipe.py`
-  Scales recipes to a target energy value
-
-- `units.py`
-  Optional human-friendly unit display (display only)
-
-- `recipe.py`
-  Example recipe definitions
+- `logic/`
+  Core nutrition calculations.
+  - `recalculate_nutrients.py` calculates total recipe nutrition
+  - `scaled_recipe.py` scales recipes to a target energy value
 
 - `main.py`
   Example entry point demonstrating the workflow

@@ -1,7 +1,7 @@
 """Service to synchronize recipe ingredients with the local database and USDA database"""
 
-from database import extract_ingredient_by_name, insert_ingredient_information
-from ingredients import (
+from .database import extract_ingredient_by_name, insert_ingredient_information
+from .ingredients import (
     extract_nutrients,
     extract_portion,
     extract_usda_food_id,

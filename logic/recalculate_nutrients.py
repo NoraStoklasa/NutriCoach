@@ -1,6 +1,6 @@
 """Recalculate nutrients for recipes based on their ingredients"""
 
-from database import extract_ingredient_by_name
+from ingredients.database import extract_ingredient_by_name
 
 
 def recalculate_nutrients(recipe):

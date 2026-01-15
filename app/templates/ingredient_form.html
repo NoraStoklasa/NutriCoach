@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Add ingredient</title>
+  </head>
+  <body>
+    <h1>Add ingredient</h1>
+
+    <form method="post">
+      <label>Name</label><br />
+      <input name="name" required /><br /><br />
+
+      <label>Reference portion (g)</label><br />
+      <input
+        name="portion_g"
+        type="number"
+        step="any"
+        value="100"
+        required
+      /><br /><br />
+
+      <label>Energy (kJ)</label><br />
+      <input name="energy_kj" type="number" step="any" required /><br /><br />
+
+      <label>Protein (g)</label><br />
+      <input name="protein_g" type="number" step="any" required /><br /><br />
+
+      <label>Carbs (g)</label><br />
+      <input name="carbs_g" type="number" step="any" required /><br /><br />
+
+      <label>Fat (g)</label><br />
+      <input name="fat_g" type="number" step="any" required /><br /><br />
+
+      <label>Fibre (g)</label><br />
+      <input name="fibre_g" type="number" step="any" required /><br /><br />
+
+      <button type="submit">Save</button>
+    </form>
+
+    <br />
+    <a href="/ingredients">Cancel</a>
+  </body>
+</html>
