@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>{{ recipe.name }}</title>
+  </head>
+  <body>
+    <h1>{{ recipe.name }}</h1>
+    <p><strong>Category:</strong> {{ recipe.category }}</p>
+
+    <h2>Ingredients</h2>
+
+    <ul>
+      {% for i in recipe.ingredients %}
+      <li>{{ i.name }} – {{ i.portion_g }} g</li>
+      {% endfor %}
+    </ul>
+
+    <h2>Nutrition (total)</h2>
+
+    <ul>
+      <li>Energy: {{ nutrients.energy_kj | round(0) }} kJ</li>
+      <li>Protein: {{ nutrients.protein_g | round(1) }} g</li>
+      <li>Carbs: {{ nutrients.carbs_g | round(1) }} g</li>
+      <li>Fat: {{ nutrients.fat_g | round(1) }} g</li>
+      <li>Fibre: {{ nutrients.fibre_g | round(1) }} g</li>
+    </ul>
+
+    <h3>Add ingredient</h3>
+
+    <form method="post">
+      <select name="ingredient_name" required>
+        {% for name in ingredients %}
+        <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
+      </select>
+
+      <input name="portion_g" type="number" step="1" required />
+
+      <button type="submit">Add</button>
+    </form>
+
+    <br />
+    <a href="/recipes">Back</a>
+  </body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Add recipe</title>
+  </head>
+  <body>
+    <h1>Add recipe</h1>
+
+    <form method="post">
+      <label>Name</label><br />
+      <input name="name" required /><br /><br />
+
+      <label>Category</label><br />
+      <select name="category" required>
+        <option value="breakfast">Breakfast</option>
+        <option value="lunch">Lunch</option>
+        <option value="dinner">Dinner</option>
+        <option value="snack">Snack</option></select
+      ><br /><br />
+
+      <label>Instructions</label><br />
+      <textarea name="instructions" rows="5" cols="40" required></textarea
+      ><br /><br />
+
+      <label>Image path (optional)</label><br />
+      <input name="image_path" /><br /><br />
+
+      <button type="submit">Save</button>
+    </form>
+
+    <br />
+    <a href="/recipes">Cancel</a>
+  </body>
+</html>
