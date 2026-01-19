@@ -1,9 +1,16 @@
 from fastapi import APIRouter, FastAPI, Form, Request
+from fastapi.responses import JSONResponse
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 import sqlite3
 
 from ingredients.manual_ingredient import add_ingredient_manually
+from ingredients.database import search_ingredient_names
+from ingredients.ingredients import (
+    search_ingredient,
+    extract_nutrients,
+    extract_portion,
+)
 
 from config import DB_PATH
 
@@ -53,4 +60,43 @@ def create_ingredient(
     return RedirectResponse(
         url="/ingredients",
         status_code=303,
+    )
+
+
+@router.get("/search")
+def search_ingredients(q: str = ""):
+    query = q.strip()
+    if not query:
+        return JSONResponse({"results": []})
+    names = search_ingredient_names(query)
+    return JSONResponse({"results": names})
+
+
+@router.post("/autofill")
+def autofill_ingredient(name: str = Form("")):
+    query = name.strip()
+    if not query:
+        return JSONResponse({"found": False, "message": "Ingredient name is required."})
+    try:
+        food_data = search_ingredient(query)
+    except Exception:
+        return JSONResponse(
+            {"found": False, "message": "Auto-fill failed. Enter values manually."}
+        )
+    if not food_data:
+        return JSONResponse(
+            {"found": False, "message": "No match found. Enter values manually."}
+        )
+    nutrients = extract_nutrients(food_data)
+    portion_g = extract_portion(food_data)
+    return JSONResponse(
+        {
+            "found": True,
+            "portion_g": portion_g,
+            "energy_kj": nutrients.get("energy_kj"),
+            "protein_g": nutrients.get("protein_g"),
+            "carbs_g": nutrients.get("carbs_g"),
+            "fat_g": nutrients.get("fat_g"),
+            "fibre_g": nutrients.get("fibre_g"),
+        }
     )

@@ -64,6 +64,42 @@ def add_recipe_ingredient(recipe_id, ingredient_name, portion_g):
         )
 
 
+def update_recipe(recipe_id, name, category, instructions="", image_path=None):
+    if category not in VALID_CATEGORIES:
+        raise ValueError("Invalid recipe category")
+
+    with sqlite3.connect(RECIPE_DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            UPDATE recipes
+            SET name = ?, category = ?, instructions = ?, image_path = ?
+            WHERE id = ?
+            """,
+            (name.strip(), category, instructions, image_path, recipe_id),
+        )
+
+
+def replace_recipe_ingredients(recipe_id, ingredients):
+    with sqlite3.connect(RECIPE_DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM recipe_ingredients WHERE recipe_id = ?",
+            (recipe_id,),
+        )
+        cursor.executemany(
+            """
+            INSERT INTO recipe_ingredients (recipe_id, ingredient_name, portion_g)
+            VALUES (?, ?, ?)
+            """,
+            [
+                (recipe_id, ing["name"], ing["portion_g"])
+                for ing in ingredients
+                if ing["name"] and ing["portion_g"] > 0
+            ],
+        )
+
+
 def load_recipe(recipe_id):
     with sqlite3.connect(RECIPE_DB_PATH) as conn:
         cursor = conn.cursor()

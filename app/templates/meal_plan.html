@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Create Meal Plan</title>
+  </head>
+  <body>
+    <h1>Create Meal Plan</h1>
+
+    <form method="post" action="/recipes/export" id="recipes-export-form">
+      {% for category in ["breakfast", "lunch", "dinner", "snack"] %}
+      <h2>{{ category | capitalize }}</h2>
+      <ul>
+        {% for r in recipes_by_category.get(category, []) %}
+        <li>
+          <label>
+            <input type="checkbox" value="{{ r[0] }}" class="recipe-checkbox" />
+            <strong>{{ r[1] }}</strong>
+          </label>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endfor %}
+      <input type="hidden" name="recipe_ids" id="recipe-ids" />
+      <button type="submit">Export selected recipes</button>
+    </form>
+
+    <script>
+      const exportForm = document.getElementById("recipes-export-form");
+      const recipeIds = document.getElementById("recipe-ids");
+
+      exportForm.addEventListener("submit", () => {
+        const selected = Array.from(
+          document.querySelectorAll(".recipe-checkbox:checked")
+        ).map((checkbox) => checkbox.value);
+        recipeIds.value = selected.join(",");
+      });
+    </script>
+
+    <a href="/">Back</a>
+  </body>
+</html>

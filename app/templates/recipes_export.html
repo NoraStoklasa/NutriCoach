@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Export recipes</title>
+  </head>
+  <body>
+    <h1>Export selected recipes</h1>
+
+    {% if recipes_by_category %}
+    <form method="post" action="/recipes/export/scale">
+      <label>Client name</label><br />
+      <input type="text" name="client_name" required />
+      <br /><br />
+
+      <table>
+        <tr>
+          <th>Category</th>
+          <th>Recipes</th>
+          <th>Current (kJ)</th>
+          <th>Target (kJ)</th>
+        </tr>
+        {% for category in ["breakfast", "lunch", "dinner", "snack"] %}
+        <tr>
+          <td>{{ category | capitalize }}</td>
+          <td>
+            <ul>
+              {% for r in recipes_by_category.get(category, []) %}
+              <li>{{ r.name }}</li>
+              <input type="hidden" name="recipe_ids" value="{{ r.id }}" />
+              {% endfor %}
+            </ul>
+          </td>
+          <td>
+            <ul>
+              {% for r in recipes_by_category.get(category, []) %}
+              <li>{{ r.energy_kj }}</li>
+              {% endfor %}
+            </ul>
+          </td>
+          <td>
+            <input type="number" name="target_kj_{{ category }}" step="1" min="0" />
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+
+      <br />
+      <button type="submit">Scale selected recipes</button>
+    </form>
+    {% else %}
+    <p>No recipes selected.</p>
+    {% endif %}
+
+    <a href="/recipes">Back to recipes</a>
+  </body>
+</html>

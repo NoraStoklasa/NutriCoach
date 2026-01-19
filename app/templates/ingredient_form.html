@@ -9,11 +9,17 @@
 
     <form method="post">
       <label>Name</label><br />
-      <input name="name" required /><br /><br />
+      <input name="name" id="ingredient-name" required /><br />
+      <button type="button" id="autofill-button">
+        Try auto-fill nutrition
+      </button>
+      <p id="autofill-message"></p>
+      <br />
 
       <label>Reference portion (g)</label><br />
       <input
         name="portion_g"
+        id="portion-g"
         type="number"
         step="any"
         value="100"
@@ -21,24 +27,99 @@
       /><br /><br />
 
       <label>Energy (kJ)</label><br />
-      <input name="energy_kj" type="number" step="any" required /><br /><br />
+      <input
+        name="energy_kj"
+        id="energy-kj"
+        type="number"
+        step="any"
+        required
+      /><br /><br />
 
       <label>Protein (g)</label><br />
-      <input name="protein_g" type="number" step="any" required /><br /><br />
+      <input
+        name="protein_g"
+        id="protein-g"
+        type="number"
+        step="any"
+        required
+      /><br /><br />
 
       <label>Carbs (g)</label><br />
-      <input name="carbs_g" type="number" step="any" required /><br /><br />
+      <input
+        name="carbs_g"
+        id="carbs-g"
+        type="number"
+        step="any"
+        required
+      /><br /><br />
 
       <label>Fat (g)</label><br />
-      <input name="fat_g" type="number" step="any" required /><br /><br />
+      <input name="fat_g" id="fat-g" type="number" step="any" required /><br /><br />
 
       <label>Fibre (g)</label><br />
-      <input name="fibre_g" type="number" step="any" required /><br /><br />
+      <input
+        name="fibre_g"
+        id="fibre-g"
+        type="number"
+        step="any"
+        required
+      /><br /><br />
 
       <button type="submit">Save</button>
     </form>
 
     <br />
     <a href="/ingredients">Cancel</a>
+
+    <script>
+      const autofillButton = document.getElementById("autofill-button");
+      const autofillMessage = document.getElementById("autofill-message");
+      const ingredientName = document.getElementById("ingredient-name");
+
+      const portionInput = document.getElementById("portion-g");
+      const energyInput = document.getElementById("energy-kj");
+      const proteinInput = document.getElementById("protein-g");
+      const carbsInput = document.getElementById("carbs-g");
+      const fatInput = document.getElementById("fat-g");
+      const fibreInput = document.getElementById("fibre-g");
+
+      autofillButton.addEventListener("click", async () => {
+        const name = ingredientName.value.trim();
+        autofillMessage.textContent = "";
+        if (!name) {
+          autofillMessage.textContent = "Enter a name before auto-fill.";
+          return;
+        }
+
+        const body = new URLSearchParams({ name });
+        const response = await fetch("/ingredients/autofill", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: body.toString(),
+        });
+
+        if (!response.ok) {
+          autofillMessage.textContent =
+            "Auto-fill failed. Enter values manually.";
+          return;
+        }
+
+        const data = await response.json();
+        if (!data.found) {
+          autofillMessage.textContent =
+            data.message || "No match found. Enter values manually.";
+          return;
+        }
+
+        if (data.portion_g != null) portionInput.value = data.portion_g;
+        if (data.energy_kj != null) energyInput.value = data.energy_kj;
+        if (data.protein_g != null) proteinInput.value = data.protein_g;
+        if (data.carbs_g != null) carbsInput.value = data.carbs_g;
+        if (data.fat_g != null) fatInput.value = data.fat_g;
+        if (data.fibre_g != null) fibreInput.value = data.fibre_g;
+
+        autofillMessage.textContent = "Auto-fill complete. Review and edit.";
+      });
+    </script>
   </body>
 </html>

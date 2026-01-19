@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Scaled recipes preview</title>
+  </head>
+  <body>
+    <h1>Scaled recipes (preview)</h1>
+    <p>Target energy by category:</p>
+    <ul>
+      <li>Breakfast: {{ targets_by_category.breakfast }} kJ</li>
+      <li>Lunch: {{ targets_by_category.lunch }} kJ</li>
+      <li>Dinner: {{ targets_by_category.dinner }} kJ</li>
+      <li>Snack: {{ targets_by_category.snack }} kJ</li>
+    </ul>
+
+    {% if error %}
+    <p>{{ error }}</p>
+    {% endif %}
+
+    <form method="post" action="/recipes/export/preview-update">
+      <input
+        type="hidden"
+        name="target_kj_breakfast"
+        value="{{ targets_by_category.breakfast }}"
+      />
+      <input type="hidden" name="client_name" value="{{ client_name }}" />
+      <input
+        type="hidden"
+        name="target_kj_lunch"
+        value="{{ targets_by_category.lunch }}"
+      />
+      <input
+        type="hidden"
+        name="target_kj_dinner"
+        value="{{ targets_by_category.dinner }}"
+      />
+      <input
+        type="hidden"
+        name="target_kj_snack"
+        value="{{ targets_by_category.snack }}"
+      />
+
+      {% for r in scaled_recipes %}
+      <hr />
+      <h2>{{ r.recipe.name }}</h2>
+      <p><strong>Category:</strong> {{ r.category | capitalize }}</p>
+      <input type="hidden" name="recipe_ids" value="{{ r.recipe_id }}" />
+
+      <ul>
+        {% for ing in r.recipe.ingredients %}
+        <li>
+          {{ ing.name }} –
+          <input
+            type="number"
+            name="portion_g_{{ r.recipe_id }}"
+            value="{{ ing.portion_g }}"
+            step="0.1"
+            required
+          />
+          g
+          <input
+            type="hidden"
+            name="ingredient_name_{{ r.recipe_id }}"
+            value="{{ ing.name }}"
+          />
+        </li>
+        {% endfor %}
+      </ul>
+
+      <p>
+        Energy: {{ r.nutrients.energy_kj | round(0) }} kJ<br />
+        Protein: {{ r.nutrients.protein_g | round(1) }} g<br />
+        Carbs: {{ r.nutrients.carbs_g | round(1) }} g<br />
+        Fat: {{ r.nutrients.fat_g | round(1) }} g<br />
+        Fibre: {{ r.nutrients.fibre_g | round(1) }} g
+      </p>
+      {% endfor %}
+
+      <button type="submit">Update preview</button>
+    </form>
+
+    <form method="post" action="/recipes/export/docx">
+      <input
+        type="hidden"
+        name="target_kj_breakfast"
+        value="{{ targets_by_category.breakfast }}"
+      />
+      <input type="hidden" name="client_name" value="{{ client_name }}" />
+      <input
+        type="hidden"
+        name="target_kj_lunch"
+        value="{{ targets_by_category.lunch }}"
+      />
+      <input
+        type="hidden"
+        name="target_kj_dinner"
+        value="{{ targets_by_category.dinner }}"
+      />
+      <input
+        type="hidden"
+        name="target_kj_snack"
+        value="{{ targets_by_category.snack }}"
+      />
+
+      {% for r in scaled_recipes %}
+      <input type="hidden" name="recipe_ids" value="{{ r.recipe_id }}" />
+      {% for ing in r.recipe.ingredients %}
+      <input
+        type="hidden"
+        name="portion_g_{{ r.recipe_id }}"
+        value="{{ ing.portion_g }}"
+      />
+      <input
+        type="hidden"
+        name="ingredient_name_{{ r.recipe_id }}"
+        value="{{ ing.name }}"
+      />
+      {% endfor %}
+      {% endfor %}
+
+      <button type="submit">Approve &amp; Export to Word</button>
+    </form>
+
+    <br />
+    <a href="/recipes">Back</a>
+  </body>
+</html>

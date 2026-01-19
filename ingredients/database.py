@@ -88,3 +88,19 @@ def get_all_ingredient_names():
         cur = conn.cursor()
         cur.execute("SELECT name FROM ingredients ORDER BY name")
         return [row[0] for row in cur.fetchall()]
+
+
+def search_ingredient_names(query, limit=20):
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT name
+            FROM ingredients
+            WHERE name LIKE ?
+            ORDER BY name
+            LIMIT ?
+            """,
+            (f"%{query}%", limit),
+        )
+        return [row[0] for row in cur.fetchall()]

@@ -11,16 +11,18 @@
       <a href="/recipes/new">➕ Add recipe</a>
     </p>
 
+    {% for category in ["breakfast", "lunch", "dinner", "snack"] %}
+    <h2>{{ category | capitalize }}</h2>
     <ul>
-      {% for r in recipes %}
+      {% for r in recipes_by_category.get(category, []) %}
       <li>
         <a href="/recipes/{{ r[0] }}">
           <strong>{{ r[1] }}</strong>
         </a>
-        ({{ r[2] }})
       </li>
       {% endfor %}
     </ul>
+    {% endfor %}
 
     <a href="/">Back</a>
   </body>
