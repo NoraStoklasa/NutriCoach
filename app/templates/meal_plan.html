@@ -2,12 +2,20 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <link rel="stylesheet" href="/static/style.css" />
     <title>Create Meal Plan</title>
   </head>
   <body>
     <h1>Create Meal Plan</h1>
 
     <form method="post" action="/recipes/export" id="recipes-export-form">
+      <label>Language</label><br />
+      <select name="lang">
+        <option value="en">English</option>
+        <option value="cs">Czech</option>
+      </select>
+      <br /><br />
+
       {% for category in ["breakfast", "lunch", "dinner", "snack"] %}
       <h2>{{ category | capitalize }}</h2>
       <ul>

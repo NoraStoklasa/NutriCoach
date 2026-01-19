@@ -22,6 +22,47 @@ from config import RECIPE_DB_PATH
 router = APIRouter(prefix="/recipes")
 templates = Jinja2Templates(directory="app/templates")
 
+LABELS = {
+    "en": {
+        "ingredients": "Ingredients",
+        "instructions": "Instructions",
+        "nutrition_summary": "Nutrition summary",
+        "energy": "Energy",
+        "protein": "Protein",
+        "carbs": "Carbs",
+        "fat": "Fat",
+        "fibre": "Fibre",
+        "client": "Client",
+        "target_energy": "Total target energy (kJ)",
+        "current_kj": "Current (kJ)",
+        "target_kj": "Target (kJ)",
+        "category": "Category",
+        "recipes": "Recipes",
+        "scale": "Scale selected recipes",
+        "export_title": "NutriCoach Export",
+        "preview_title": "Scaled recipes (preview)",
+    },
+    "cs": {
+        "ingredients": "Suroviny",
+        "instructions": "Postup",
+        "nutrition_summary": "Výživové hodnoty",
+        "energy": "Energie",
+        "protein": "Bílkoviny",
+        "carbs": "Sacharidy",
+        "fat": "Tuky",
+        "fibre": "Vláknina",
+        "client": "Klient",
+        "target_energy": "Cílová energie (kJ)",
+        "current_kj": "Aktuální (kJ)",
+        "target_kj": "Cílové (kJ)",
+        "category": "Kategorie",
+        "recipes": "Recepty",
+        "scale": "Přepočítat vybrané recepty",
+        "export_title": "NutriCoach Export",
+        "preview_title": "Náhled přepočítaných receptů",
+    },
+}
+
 
 # Route to list all recipes from the database
 @router.get("")
@@ -118,7 +159,7 @@ def create_recipe_post(
 
 
 @router.post("/export")
-def export_recipes(request: Request, recipe_ids: str = Form("")):
+def export_recipes(request: Request, recipe_ids: str = Form(""), lang: str = Form("en")):
     ids = []
     for rid in recipe_ids.split(","):
         rid = rid.strip()
@@ -150,33 +191,36 @@ def export_recipes(request: Request, recipe_ids: str = Form("")):
     for recipe in recipes:
         recipes_by_category.setdefault(recipe["category"], []).append(recipe)
 
+    template_name = "recipes_export_cs.html" if lang == "cs" else "recipes_export.html"
     return templates.TemplateResponse(
-        "recipes_export.html",
+        template_name,
         {
             "request": request,
             "recipes_by_category": recipes_by_category,
+            "lang": lang,
         },
     )
 
 
 @router.post("/export/scale")
-def scale_selected_recipes(
-    request: Request,
-    recipe_ids: List[int] = Form(...),
-    client_name: str = Form(""),
-    target_kj_breakfast: float = Form(0),
-    target_kj_lunch: float = Form(0),
-    target_kj_dinner: float = Form(0),
-    target_kj_snack: float = Form(0),
-):
+async def scale_selected_recipes(request: Request):
+    form = await request.form()
+    recipe_ids = form.getlist("recipe_ids")
+    client_name = form.get("client_name") or ""
+    lang = form.get("lang") or "en"
+    labels = LABELS.get(lang, LABELS["en"])
     targets_by_category = {
-        "breakfast": target_kj_breakfast,
-        "lunch": target_kj_lunch,
-        "dinner": target_kj_dinner,
-        "snack": target_kj_snack,
+        "breakfast": float(form.get("target_kj_breakfast") or 0),
+        "lunch": float(form.get("target_kj_lunch") or 0),
+        "dinner": float(form.get("target_kj_dinner") or 0),
+        "snack": float(form.get("target_kj_snack") or 0),
     }
     recipes = []
-    for rid in recipe_ids:
+    for rid_value in recipe_ids:
+        try:
+            rid = int(rid_value)
+        except ValueError:
+            continue
         recipe = load_recipe(rid)
         if recipe:
             recipes.append((rid, recipe))
@@ -184,10 +228,13 @@ def scale_selected_recipes(
     scaled_recipes = []
     for rid, recipe in recipes:
         category = recipe.get("category", "")
-        target_kj = targets_by_category.get(category, 0) or 0
-        if target_kj <= 0:
-            continue
-        scaled_recipe, scaled_nutrients = scale_recipe_to_energy(recipe, target_kj)
+        recipe_target = float(form.get(f"target_kj_recipe_{rid}") or 0)
+        target_kj = recipe_target or (targets_by_category.get(category, 0) or 0)
+        if target_kj > 0:
+            scaled_recipe, scaled_nutrients = scale_recipe_to_energy(recipe, target_kj)
+        else:
+            scaled_recipe = recipe
+            scaled_nutrients = recalculate_nutrients(recipe)
         scaled_recipes.append(
             {
                 "recipe_id": rid,
@@ -203,6 +250,8 @@ def scale_selected_recipes(
             "scaled_recipes": scaled_recipes,
             "targets_by_category": targets_by_category,
             "client_name": client_name,
+            "labels": labels,
+            "lang": lang,
             "error": None,
         },
     )
@@ -213,6 +262,8 @@ async def update_preview(request: Request):
     form = await request.form()
     recipe_ids = form.getlist("recipe_ids")
     client_name = form.get("client_name") or ""
+    lang = form.get("lang") or "en"
+    labels = LABELS.get(lang, LABELS["en"])
     targets_by_category = {
         "breakfast": float(form.get("target_kj_breakfast") or 0),
         "lunch": float(form.get("target_kj_lunch") or 0),
@@ -256,6 +307,8 @@ async def update_preview(request: Request):
             "scaled_recipes": scaled_recipes,
             "targets_by_category": targets_by_category,
             "client_name": client_name,
+            "labels": labels,
+            "lang": lang,
             "error": None,
         },
     )
@@ -274,6 +327,8 @@ async def export_docx(request: Request):
     form = await request.form()
     recipe_ids = form.getlist("recipe_ids")
     client_name = (form.get("client_name") or "").strip()
+    lang = form.get("lang") or "en"
+    labels = LABELS.get(lang, LABELS["en"])
 
     recipes = []
     for rid_value in recipe_ids:
@@ -298,9 +353,9 @@ async def export_docx(request: Request):
         recipes.append({"recipe": recipe, "nutrients": nutrients})
 
     doc = Document()
-    doc.add_heading("NutriCoach Export", level=1)
+    doc.add_heading(labels["export_title"], level=1)
     if client_name:
-        doc.add_paragraph(f"Client: {client_name}")
+        doc.add_paragraph(f"{labels['client']}: {client_name}")
 
     for item in recipes:
         recipe = item["recipe"]
@@ -315,7 +370,7 @@ async def export_docx(request: Request):
             except Exception:
                 pass
 
-        doc.add_paragraph("Ingredients:")
+        doc.add_paragraph(f"{labels['ingredients']}:")
         for ing in recipe.get("ingredients", []):
             doc.add_paragraph(
                 f"- {ing.get('name', '')} – {ing.get('portion_g', 0)} g",
@@ -324,15 +379,15 @@ async def export_docx(request: Request):
 
         instructions = recipe.get("instructions") or ""
         if instructions:
-            doc.add_paragraph("Instructions:")
+            doc.add_paragraph(f"{labels['instructions']}:")
             doc.add_paragraph(instructions)
 
-        doc.add_paragraph("Nutrition summary:")
-        doc.add_paragraph(f"Energy: {nutrients['energy_kj']} kJ")
-        doc.add_paragraph(f"Protein: {nutrients['protein_g']} g")
-        doc.add_paragraph(f"Carbs: {nutrients['carbs_g']} g")
-        doc.add_paragraph(f"Fat: {nutrients['fat_g']} g")
-        doc.add_paragraph(f"Fibre: {nutrients['fibre_g']} g")
+        doc.add_paragraph(f"{labels['nutrition_summary']}:")
+        doc.add_paragraph(f"{labels['energy']}: {nutrients['energy_kj']} kJ")
+        doc.add_paragraph(f"{labels['protein']}: {nutrients['protein_g']} g")
+        doc.add_paragraph(f"{labels['carbs']}: {nutrients['carbs_g']} g")
+        doc.add_paragraph(f"{labels['fat']}: {nutrients['fat_g']} g")
+        doc.add_paragraph(f"{labels['fibre']}: {nutrients['fibre_g']} g")
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
         temp_path = tmp.name

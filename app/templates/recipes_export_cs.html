@@ -1,27 +1,27 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="/static/style.css" />
-    <title>Export recipes</title>
+    <title>Export receptů</title>
   </head>
   <body>
-    <h1>Export selected recipes</h1>
+    <h1>Export vybraných receptů</h1>
 
     {% if recipes_by_category %}
     <form method="post" action="/recipes/export/scale">
-      <input type="hidden" name="lang" value="en" />
-      <label>Client</label><br />
+      <input type="hidden" name="lang" value="cs" />
+      <label>Klient</label><br />
       <input type="text" name="client_name" required />
       <br /><br />
 
       <table>
         <tr>
-          <th>Category</th>
-          <th>Recipes</th>
-          <th>Current (kJ)</th>
-          <th>Target per recipe (kJ)</th>
-          <th>Target (kJ)</th>
+          <th>Kategorie</th>
+          <th>Recepty</th>
+          <th>Aktuální (kJ)</th>
+          <th>Cílové na recept (kJ)</th>
+          <th>Cílové (kJ)</th>
         </tr>
         {% for category in ["breakfast", "lunch", "dinner", "snack"] %}
         <tr>
@@ -56,24 +56,19 @@
             </ul>
           </td>
           <td>
-            <input
-              type="number"
-              name="target_kj_{{ category }}"
-              step="1"
-              min="0"
-            />
+            <input type="number" name="target_kj_{{ category }}" step="1" min="0" />
           </td>
         </tr>
         {% endfor %}
       </table>
 
       <br />
-      <button type="submit">Scale selected recipes</button>
+      <button type="submit">Přepočítat vybrané recepty</button>
     </form>
     {% else %}
-    <p>No recipes selected.</p>
+    <p>Nebyly vybrány žádné recepty.</p>
     {% endif %}
 
-    <a href="/recipes/meal-plan">Back to recipes</a>
+    <a href="/recipes/meal-plan">Zpět na výběr</a>
   </body>
 </html>
