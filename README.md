@@ -1,6 +1,6 @@
 # NutriCoach
 
-NutriCoach is a small Python application designed to help nutritionists **manage ingredients**, **calculate recipe nutrition**, and **scale meals to a target energy value**.
+NutriCoach is a small Python web application designed to help nutritionists **manage ingredients**, **calculate recipe nutrition**, and **scale meals to a target energy value**.
 
 The project focuses on accuracy, flexibility, and simplicity, following realistic professional nutrition workflows.
 
@@ -68,17 +68,27 @@ NutriCoach is a **calculation and data tool**, not an AI nutrition advisor.
   - `ingredient_service.py` ensures recipe ingredients exist in the local database
   - `manual_ingredient.py` adds or updates ingredients manually
 
-- `recipes/`
-  Recipe persistence and example recipes.
-  - `recipe_database.py` stores recipes and their ingredients
-
 - `logic/`
   Core nutrition calculations.
   - `recalculate_nutrients.py` calculates total recipe nutrition
   - `scaled_recipe.py` scales recipes to a target energy value
 
-- `main.py`
-  Example entry point demonstrating the workflow
+- `app/`
+  FastAPI web app (routes, templates, and static assets).
+  - `routes/` recipe and ingredient endpoints + helpers
+  - `templates/` Jinja2 HTML templates
+  - `static/` CSS
+  - `labels.py` UI text labels used by exports
+
+- `recipes/`
+  Recipe persistence (SQLite).
+  - `recipe_database.py` stores recipes and their ingredients
+
+- `config.py`
+  Paths and configuration values
+
+- `app/main.py`
+  FastAPI entry point
 
 ---
 
