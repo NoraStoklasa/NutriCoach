@@ -48,16 +48,6 @@ This is useful for portion control and meal planning.
 
 ---
 
-### Human-friendly units (optional)
-
-- Internally, all calculations use grams
-- For display purposes only, some ingredients can be shown in units
-  (e.g. eggs, bananas, slices of bread)
-- Units are approximate and never affect calculations
-
-This keeps results readable without losing precision.
-
----
 
 ## What NutriCoach does NOT do (by design)
 
@@ -77,12 +67,10 @@ NutriCoach is a **calculation and data tool**, not an AI nutrition advisor.
   - `ingredients.py` fetches and parses USDA FoodData Central data
   - `ingredient_service.py` ensures recipe ingredients exist in the local database
   - `manual_ingredient.py` adds or updates ingredients manually
-  - `units.py` optional human-friendly unit display (display only)
 
 - `recipes/`
   Recipe persistence and example recipes.
   - `recipe_database.py` stores recipes and their ingredients
-  - `recipe.py` example recipe definitions
 
 - `logic/`
   Core nutrition calculations.
@@ -100,7 +88,7 @@ NutriCoach is a **calculation and data tool**, not an AI nutrition advisor.
 2. Build recipes using ingredient names and grams
 3. Calculate total nutrition for the recipe
 4. Scale the recipe to a desired energy value
-5. Read results in grams (and optional units)
+5. Read results in grams
 
 ---
 

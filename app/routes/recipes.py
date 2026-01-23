@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, FileResponse, PlainTextResponse
-import sqlite3
 import tempfile
 from pathlib import Path
 from typing import List
@@ -16,80 +15,24 @@ from recipes.recipe_database import (
 from ingredients.database import get_all_ingredient_names
 from logic.recalculate_nutrients import recalculate_nutrients
 from logic.scaled_recipe import scale_recipe_to_energy
-
-
+from app.labels import LABELS
+from app.routes.recipes_helpers import (
+    fetch_recipes_by_category,
+    group_recipes_by_category,
+    ingredients_from_form,
+    parse_float,
+    targets_by_category as parse_targets_by_category,
+)
 from config import RECIPE_DB_PATH
 
 router = APIRouter(prefix="/recipes")
 templates = Jinja2Templates(directory="app/templates")
 
-LABELS = {
-    "en": {
-        "ingredients": "Ingredients",
-        "instructions": "Instructions",
-        "nutrition_summary": "Nutrition summary",
-        "energy": "Energy",
-        "protein": "Protein",
-        "carbs": "Carbs",
-        "fat": "Fat",
-        "fibre": "Fibre",
-        "client": "Client",
-        "target_energy": "Total target energy (kJ)",
-        "current_kj": "Current (kJ)",
-        "target_kj": "Target (kJ)",
-        "category": "Category",
-        "recipes": "Recipes",
-        "scale": "Scale selected recipes",
-        "export_title": "NutriCoach Export",
-        "preview_title": "Scaled recipes (preview)",
-    },
-    "cs": {
-        "ingredients": "Suroviny",
-        "instructions": "Postup",
-        "nutrition_summary": "Výživové hodnoty",
-        "energy": "Energie",
-        "protein": "Bílkoviny",
-        "carbs": "Sacharidy",
-        "fat": "Tuky",
-        "fibre": "Vláknina",
-        "client": "Klient",
-        "target_energy": "Cílová energie (kJ)",
-        "current_kj": "Aktuální (kJ)",
-        "target_kj": "Cílové (kJ)",
-        "category": "Kategorie",
-        "recipes": "Recepty",
-        "scale": "Přepočítat vybrané recepty",
-        "export_title": "NutriCoach Export",
-        "preview_title": "Náhled přepočítaných receptů",
-    },
-}
 
-
-# Route to list all recipes from the database
+# Route to list all recipes from the database.
 @router.get("")
 def list_recipes(request: Request):
-    with sqlite3.connect(RECIPE_DB_PATH) as conn:
-        cur = conn.cursor()
-        cur.execute(
-            """
-            SELECT id, name, category
-            FROM recipes
-            ORDER BY category, name
-        """
-        )
-        recipes = cur.fetchall()
-
-    recipes_by_category = {
-        "breakfast": [],
-        "lunch": [],
-        "dinner": [],
-        "snack": [],
-    }
-    for recipe in recipes:
-        recipes_by_category.setdefault(recipe[2], []).append(recipe)
-
-    for items in recipes_by_category.values():
-        items.sort(key=lambda item: item[1].lower())
+    recipes_by_category = fetch_recipes_by_category()
 
     return templates.TemplateResponse(
         "recipes_list.html",
@@ -100,31 +43,10 @@ def list_recipes(request: Request):
     )
 
 
-# Route to show meal plan selection (export)
+# Route to show meal plan selection (export).
 @router.get("/meal-plan")
 def meal_plan(request: Request):
-    with sqlite3.connect(RECIPE_DB_PATH) as conn:
-        cur = conn.cursor()
-        cur.execute(
-            """
-            SELECT id, name, category
-            FROM recipes
-            ORDER BY category, name
-        """
-        )
-        recipes = cur.fetchall()
-
-    recipes_by_category = {
-        "breakfast": [],
-        "lunch": [],
-        "dinner": [],
-        "snack": [],
-    }
-    for recipe in recipes:
-        recipes_by_category.setdefault(recipe[2], []).append(recipe)
-
-    for items in recipes_by_category.values():
-        items.sort(key=lambda item: item[1].lower())
+    recipes_by_category = fetch_recipes_by_category()
 
     return templates.TemplateResponse(
         "meal_plan.html",
@@ -135,7 +57,7 @@ def meal_plan(request: Request):
     )
 
 
-# Route to show the form for adding a new recipe
+# Route to show the form for adding a new recipe.
 @router.get("/new")
 def new_recipe_form(request: Request):
     return templates.TemplateResponse(
@@ -144,7 +66,7 @@ def new_recipe_form(request: Request):
     )
 
 
-# Route to handle the submission of a new recipe
+# Route to handle the submission of a new recipe.
 @router.post("/new")
 def create_recipe_post(
     name: str = Form(...),
@@ -189,14 +111,9 @@ def export_recipes(request: Request, recipe_ids: str = Form(""), lang: str = For
                 **recipe,
             }
         )
-    recipes_by_category = {
-        "breakfast": [],
-        "lunch": [],
-        "dinner": [],
-        "snack": [],
-    }
-    for recipe in recipes:
-        recipes_by_category.setdefault(recipe["category"], []).append(recipe)
+    recipes_by_category = group_recipes_by_category(
+        recipes, lambda r: r["category"], lambda r: r["name"]
+    )
 
     template_name = "recipes_export_cs.html" if lang == "cs" else "recipes_export.html"
     return templates.TemplateResponse(
@@ -216,12 +133,7 @@ async def scale_selected_recipes(request: Request):
     client_name = form.get("client_name") or ""
     lang = form.get("lang") or "en"
     labels = LABELS.get(lang, LABELS["en"])
-    targets_by_category = {
-        "breakfast": float(form.get("target_kj_breakfast") or 0),
-        "lunch": float(form.get("target_kj_lunch") or 0),
-        "dinner": float(form.get("target_kj_dinner") or 0),
-        "snack": float(form.get("target_kj_snack") or 0),
-    }
+    targets_by_category = parse_targets_by_category(form)
     recipes = []
     for rid_value in recipe_ids:
         try:
@@ -235,7 +147,7 @@ async def scale_selected_recipes(request: Request):
     scaled_recipes = []
     for rid, recipe in recipes:
         category = recipe.get("category", "")
-        recipe_target = float(form.get(f"target_kj_recipe_{rid}") or 0)
+        recipe_target = parse_float(form.get(f"target_kj_recipe_{rid}"))
         target_kj = recipe_target or (targets_by_category.get(category, 0) or 0)
         if target_kj > 0:
             scaled_recipe, scaled_nutrients = scale_recipe_to_energy(recipe, target_kj)
@@ -271,12 +183,7 @@ async def update_preview(request: Request):
     client_name = form.get("client_name") or ""
     lang = form.get("lang") or "en"
     labels = LABELS.get(lang, LABELS["en"])
-    targets_by_category = {
-        "breakfast": float(form.get("target_kj_breakfast") or 0),
-        "lunch": float(form.get("target_kj_lunch") or 0),
-        "dinner": float(form.get("target_kj_dinner") or 0),
-        "snack": float(form.get("target_kj_snack") or 0),
-    }
+    targets_by_category = parse_targets_by_category(form)
 
     scaled_recipes = []
     for rid_value in recipe_ids:
@@ -287,16 +194,7 @@ async def update_preview(request: Request):
         recipe = load_recipe(rid)
         if not recipe:
             continue
-        names = form.getlist(f"ingredient_name_{rid}")
-        portions = form.getlist(f"portion_g_{rid}")
-        ingredients = []
-        for name, portion_value in zip(names, portions):
-            try:
-                portion = float(portion_value)
-            except (TypeError, ValueError):
-                continue
-            ingredients.append({"name": name, "portion_g": portion})
-        recipe["ingredients"] = ingredients
+        recipe["ingredients"] = ingredients_from_form(form, rid)
         nutrients = recalculate_nutrients(recipe)
         scaled_recipes.append(
             {
@@ -346,16 +244,7 @@ async def export_docx(request: Request):
         recipe = load_recipe(rid)
         if not recipe:
             continue
-        names = form.getlist(f"ingredient_name_{rid}")
-        portions = form.getlist(f"portion_g_{rid}")
-        ingredients = []
-        for name, portion_value in zip(names, portions):
-            try:
-                portion = float(portion_value)
-            except (TypeError, ValueError):
-                continue
-            ingredients.append({"name": name, "portion_g": portion})
-        recipe["ingredients"] = ingredients
+        recipe["ingredients"] = ingredients_from_form(form, rid)
         nutrients = recalculate_nutrients(recipe)
         recipes.append({"recipe": recipe, "nutrients": nutrients})
 
@@ -409,10 +298,12 @@ async def export_docx(request: Request):
     )
 
 
-# Route to show the details of a specific recipe
+# Route to show the details of a specific recipe.
 @router.get("/{recipe_id}")
 def recipe_detail(request: Request, recipe_id: int):
     recipe = load_recipe(recipe_id)
+    if not recipe:
+        return RedirectResponse(url="/recipes", status_code=303)
     ingredients = get_all_ingredient_names()
 
     nutrients = recalculate_nutrients(recipe)
