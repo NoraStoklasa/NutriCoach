@@ -422,6 +422,21 @@ def recipe_detail(request: Request, recipe_id: int):
     )
 
 
+@router.get("/{recipe_id}/edit")
+def edit_recipe_form(request: Request, recipe_id: int):
+    recipe = load_recipe(recipe_id)
+    if not recipe:
+        return RedirectResponse(url="/recipes", status_code=303)
+    return templates.TemplateResponse(
+        "recipe_edit.html",
+        {
+            "request": request,
+            "recipe_id": recipe_id,
+            "recipe": recipe,
+        },
+    )
+
+
 # Route to handle adding an ingredient to a specific recipe
 @router.post("/{recipe_id}")
 def add_ingredient_to_recipe(

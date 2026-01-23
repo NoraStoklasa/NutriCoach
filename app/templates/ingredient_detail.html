@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ ingredient.name }}{% endblock %}
+{% block content %}
+    <h1>{{ ingredient.name }}</h1>
+
+    <form method="post">
+      <label>Name</label><br />
+      <input name="name" value="{{ ingredient.name }}" required /><br /><br />
+
+      <label>Reference portion (g)</label><br />
+      <input
+        name="portion_g"
+        type="number"
+        step="any"
+        value="{{ ingredient.portion_g }}"
+        required
+      /><br /><br />
+
+      <label>Energy (kJ)</label><br />
+      <input
+        name="energy_kj"
+        type="number"
+        step="any"
+        value="{{ ingredient.energy_kj }}"
+        required
+      /><br /><br />
+
+      <label>Protein (g)</label><br />
+      <input
+        name="protein_g"
+        type="number"
+        step="any"
+        value="{{ ingredient.protein_g }}"
+        required
+      /><br /><br />
+
+      <label>Carbs (g)</label><br />
+      <input
+        name="carbs_g"
+        type="number"
+        step="any"
+        value="{{ ingredient.carbs_g }}"
+        required
+      /><br /><br />
+
+      <label>Fat (g)</label><br />
+      <input
+        name="fat_g"
+        type="number"
+        step="any"
+        value="{{ ingredient.fat_g }}"
+        required
+      /><br /><br />
+
+      <label>Fibre (g)</label><br />
+      <input
+        name="fibre_g"
+        type="number"
+        step="any"
+        value="{{ ingredient.fibre_g }}"
+        required
+      /><br /><br />
+
+      <button type="submit">Save</button>
+    </form>
+
+    <a href="/ingredients">Back to ingredients</a>
+{% endblock %}

@@ -1,15 +1,9 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="/static/style.css" />
-    <title>{{ recipe.name }}</title>
-  </head>
-  <body>
+{% extends "base.html" %}
+{% block title %}{{ recipe.name }}{% endblock %}
+{% block content %}
     <h1>{{ recipe.name }}</h1>
     <p><strong>Category:</strong> {{ recipe.category }}</p>
     <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
-    <a href="/recipes">Back</a>
 
     <h2>Ingredients</h2>
 
@@ -29,105 +23,8 @@
       <li>Fibre: {{ nutrients.fibre_g | round(1) }} g</li>
     </ul>
 
-    <h3>Add ingredient</h3>
-
-    <form method="post">
-      <input
-        name="ingredient_name"
-        list="ingredient-options"
-        id="ingredient-input"
-        placeholder="Start typing ingredient name"
-        required
-      />
-      <datalist id="ingredient-options">
-        {% for name in ingredients %}
-        <option value="{{ name }}"></option>
-        {% endfor %}
-      </datalist>
-
-      <input
-        name="portion_g"
-        type="number"
-        step="1"
-        placeholder="grams"
-        required
-      />
-
-      <button type="submit">Add</button>
-    </form>
-    <script>
-      const ingredientInput = document.getElementById("ingredient-input");
-      const ingredientOptions = document.getElementById("ingredient-options");
-      let searchTimeout = null;
-
-      ingredientInput.addEventListener("input", () => {
-        const query = ingredientInput.value.trim();
-        if (query.length < 2) {
-          ingredientOptions.innerHTML = "";
-          return;
-        }
-
-        if (searchTimeout) {
-          clearTimeout(searchTimeout);
-        }
-
-        searchTimeout = setTimeout(async () => {
-          const response = await fetch(
-            `/ingredients/search?q=${encodeURIComponent(query)}`
-          );
-          if (!response.ok) {
-            return;
-          }
-          const data = await response.json();
-          ingredientOptions.innerHTML = "";
-          data.results.forEach((name) => {
-            const option = document.createElement("option");
-            option.value = name;
-            ingredientOptions.appendChild(option);
-          });
-        }, 200);
-      });
-    </script>
-
-    <p><strong>Edit recipe</strong></p>
-
-    <form method="post" action="/recipes/{{ recipe_id }}/edit">
-      <label>Name</label><br />
-      <input name="name" value="{{ recipe.name }}" required /><br /><br />
-
-      <label>Category</label><br />
-      <select name="category" required>
-        <option value="breakfast" {% if recipe.category == "breakfast" %}selected{% endif %}>
-          Breakfast
-        </option>
-        <option value="lunch" {% if recipe.category == "lunch" %}selected{% endif %}>
-          Lunch
-        </option>
-        <option value="dinner" {% if recipe.category == "dinner" %}selected{% endif %}>
-          Dinner
-        </option>
-        <option value="snack" {% if recipe.category == "snack" %}selected{% endif %}>
-          Snack
-        </option>
-      </select>
-      <br /><br />
-
-      <label>Instructions</label><br />
-      <textarea name="instructions" rows="5" cols="40" required>{{ recipe.instructions }}</textarea>
-      <br /><br />
-
-      <label>Image path (optional)</label><br />
-      <input name="image_path" value="{{ recipe.image_path }}" /><br /><br />
-
-      <label>Ingredients</label><br />
-      {% for i in recipe.ingredients %}
-      <input name="ingredient_name" value="{{ i.name }}" required />
-      <input name="portion_g" type="number" step="1" value="{{ i.portion_g }}" required />
-      <br />
-      {% endfor %}
-      <br />
-
-      <button type="submit">Save</button>
-    </form>
-  </body>
-</html>
+    <p>
+      <a href="/recipes/{{ recipe_id }}/edit" class="button-link">Edit recipe</a>
+      <a href="/recipes" class="button-link">Back</a>
+    </p>
+{% endblock %}

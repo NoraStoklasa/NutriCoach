@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="/static/style.css" />
-    <title>Create Meal Plan</title>
-  </head>
-  <body>
+{% extends "base.html" %}
+{% block title %}Create Meal Plan{% endblock %}
+{% block content %}
     <h1>Create Meal Plan</h1>
 
     <form method="post" action="/recipes/export" id="recipes-export-form">
@@ -46,5 +41,4 @@
     </script>
 
     <a href="/">Back</a>
-  </body>
-</html>
+{% endblock %}

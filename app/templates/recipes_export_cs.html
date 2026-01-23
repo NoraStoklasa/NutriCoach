@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="/static/style.css" />
-    <title>Export receptů</title>
-  </head>
-  <body>
+{% extends "base.html" %}
+{% block title %}Export receptu{% endblock %}
+{% block content %}
     <h1>Export vybraných receptů</h1>
 
     {% if recipes_by_category %}
@@ -70,5 +65,4 @@
     {% endif %}
 
     <a href="/recipes/meal-plan">Zpět na výběr</a>
-  </body>
-</html>
+{% endblock %}

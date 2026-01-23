@@ -1,6 +1,5 @@
-from fastapi import APIRouter, FastAPI, Form, Request
-from fastapi.responses import JSONResponse
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Form, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import sqlite3
 
@@ -23,8 +22,8 @@ templates = Jinja2Templates(directory="app/templates")
 def list_ingredients(request: Request):
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT name FROM ingredients ORDER by name")
-        ingredients = [row[0] for row in cursor.fetchall()]
+        cursor.execute("SELECT id, name FROM ingredients ORDER by name")
+        ingredients = cursor.fetchall()
     return templates.TemplateResponse(
         "ingredients_list.html", {"request": request, "ingredients": ingredients}
     )
@@ -70,6 +69,70 @@ def search_ingredients(q: str = ""):
         return JSONResponse({"results": []})
     names = search_ingredient_names(query)
     return JSONResponse({"results": names})
+
+
+@router.get("/{ingredient_id}")
+def ingredient_detail(request: Request, ingredient_id: int):
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT name, portion_g, energy_kj, protein_g, carbs_g, fat_g, fibre_g
+            FROM ingredients
+            WHERE id = ?
+            """,
+            (ingredient_id,),
+        )
+        row = cursor.fetchone()
+    if not row:
+        return RedirectResponse(url="/ingredients", status_code=303)
+    ingredient = {
+        "name": row[0],
+        "portion_g": row[1],
+        "energy_kj": row[2],
+        "protein_g": row[3],
+        "carbs_g": row[4],
+        "fat_g": row[5],
+        "fibre_g": row[6],
+    }
+    return templates.TemplateResponse(
+        "ingredient_detail.html",
+        {"request": request, "ingredient": ingredient},
+    )
+
+
+@router.post("/{ingredient_id}")
+def update_ingredient(
+    ingredient_id: int,
+    name: str = Form(...),
+    portion_g: float = Form(...),
+    energy_kj: float = Form(...),
+    protein_g: float = Form(...),
+    carbs_g: float = Form(...),
+    fat_g: float = Form(...),
+    fibre_g: float = Form(...),
+):
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            UPDATE ingredients
+            SET name = ?, portion_g = ?, energy_kj = ?, protein_g = ?,
+                carbs_g = ?, fat_g = ?, fibre_g = ?
+            WHERE id = ?
+            """,
+            (
+                name.strip(),
+                portion_g,
+                energy_kj,
+                protein_g,
+                carbs_g,
+                fat_g,
+                fibre_g,
+                ingredient_id,
+            ),
+        )
+    return RedirectResponse(url=f"/ingredients/{ingredient_id}", status_code=303)
 
 
 @router.post("/autofill")

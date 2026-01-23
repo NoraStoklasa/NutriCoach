@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="/static/style.css" />
-    <title>Add ingredient</title>
-  </head>
-  <body>
+{% extends "base.html" %}
+{% block title %}Add ingredient{% endblock %}
+{% block content %}
     <h1>Add ingredient</h1>
 
     <form method="post">
@@ -122,5 +117,4 @@
         autofillMessage.textContent = "Auto-fill complete. Review and edit.";
       });
     </script>
-  </body>
-</html>
+{% endblock %}

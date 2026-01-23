@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="/static/style.css" />
-    <title>Recipes</title>
-  </head>
-  <body>
+{% extends "base.html" %}
+{% block title %}Recipes{% endblock %}
+{% block content %}
     <h1>Recipes</h1>
 
     <p>
@@ -24,7 +19,5 @@
       {% endfor %}
     </ul>
     {% endfor %}
-
     <a href="/">Back</a>
-  </body>
-</html>
+{% endblock %}

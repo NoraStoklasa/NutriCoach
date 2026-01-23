@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="/static/style.css" />
-    <title>NutriCoach</title>
-  </head>
-  <body>
+{% extends "base.html" %}
+{% block title %}NutriCoach{% endblock %}
+{% block content %}
     <h1>Welcome to NutriCoach</h1>
 
     <p><a href="/ingredients">Ingredients</a></p>
@@ -16,6 +11,4 @@
 
     <p><a href="/recipes/meal-plan">Create Meal Plan</a></p>
     <p>Select recipes and export</p>
-
-  </body>
-</html>
+{% endblock %}

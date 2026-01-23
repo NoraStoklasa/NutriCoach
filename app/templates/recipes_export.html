@@ -1,11 +1,6 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="/static/style.css" />
-    <title>Export recipes</title>
-  </head>
-  <body>
+{% extends "base.html" %}
+{% block title %}Export recipes{% endblock %}
+{% block content %}
     <h1>Export selected recipes</h1>
 
     {% if recipes_by_category %}
@@ -75,5 +70,4 @@
     {% endif %}
 
     <a href="/recipes/meal-plan">Back to recipes</a>
-  </body>
-</html>
+{% endblock %}

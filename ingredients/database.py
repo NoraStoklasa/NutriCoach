@@ -81,9 +81,6 @@ def extract_ingredient_by_name(name):
 
 
 def get_all_ingredient_names():
-    import sqlite3
-    from config import DB_PATH
-
     with sqlite3.connect(DB_PATH) as conn:
         cur = conn.cursor()
         cur.execute("SELECT name FROM ingredients ORDER BY name")

@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="/static/style.css" />
-    <title>Scaled recipes preview</title>
-  </head>
-  <body>
+{% extends "base.html" %}
+{% block title %}Scaled recipes preview{% endblock %}
+{% block content %}
     <h1>{{ labels.preview_title }}</h1>
     <p>Target energy by category:</p>
     <ul>
@@ -127,5 +122,4 @@
 
     <br />
     <a href="/recipes">Back</a>
-  </body>
-</html>
+{% endblock %}

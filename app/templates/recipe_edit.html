@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ recipe.name }}{% endblock %}
+{% block content %}
+    <h1>Edit recipe</h1>
+
+    <form method="post" action="/recipes/{{ recipe_id }}/edit">
+      <label>Name</label><br />
+      <input name="name" value="{{ recipe.name }}" required /><br /><br />
+
+      <label>Category</label><br />
+      <select name="category" required>
+        <option value="breakfast" {% if recipe.category == "breakfast" %}selected{% endif %}>
+          Breakfast
+        </option>
+        <option value="lunch" {% if recipe.category == "lunch" %}selected{% endif %}>
+          Lunch
+        </option>
+        <option value="dinner" {% if recipe.category == "dinner" %}selected{% endif %}>
+          Dinner
+        </option>
+        <option value="snack" {% if recipe.category == "snack" %}selected{% endif %}>
+          Snack
+        </option>
+      </select>
+      <br /><br />
+
+      <label>Instructions</label><br />
+      <textarea name="instructions" rows="5" cols="40" required>{{ recipe.instructions }}</textarea>
+      <br /><br />
+
+      <label>Image path (optional)</label><br />
+      <input name="image_path" value="{{ recipe.image_path }}" /><br /><br />
+
+      <label>Ingredients</label><br />
+      <div id="ingredients-list">
+      {% for i in recipe.ingredients %}
+      <span class="ingredient-row">
+        <input name="ingredient_name" value="{{ i.name }}" required />
+        <input name="portion_g" type="number" step="1" value="{{ i.portion_g }}" required />
+        <button type="button" class="remove-ingredient">-</button>
+        <br />
+      </span>
+      {% endfor %}
+      </div>
+      <button type="button" id="add-ingredient">Add ingredient</button>
+      <br />
+
+      <button type="submit">Save</button>
+    </form>
+
+    <a href="/recipes/{{ recipe_id }}">Back to recipe</a>
+    <script>
+      const addButton = document.getElementById("add-ingredient");
+      const ingredientsList = document.getElementById("ingredients-list");
+
+      addButton.addEventListener("click", () => {
+        const row = document.createElement("span");
+        row.className = "ingredient-row";
+
+        const nameInput = document.createElement("input");
+        nameInput.name = "ingredient_name";
+        nameInput.placeholder = "ingredient name";
+
+        const portionInput = document.createElement("input");
+        portionInput.name = "portion_g";
+        portionInput.type = "number";
+        portionInput.step = "1";
+        portionInput.placeholder = "grams";
+
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "remove-ingredient";
+        removeButton.textContent = "-";
+
+        const lineBreak = document.createElement("br");
+
+        row.appendChild(nameInput);
+        row.appendChild(portionInput);
+        row.appendChild(removeButton);
+        row.appendChild(lineBreak);
+        ingredientsList.appendChild(row);
+      });
+
+      ingredientsList.addEventListener("click", (event) => {
+        if (!event.target.classList.contains("remove-ingredient")) {
+          return;
+        }
+        const row = event.target.closest(".ingredient-row");
+        if (row) {
+          row.remove();
+        }
+      });
+    </script>
+{% endblock %}

@@ -24,6 +24,16 @@ a {
   color: #2f2a24;
 }
 
+.button-link {
+  display: inline-block;
+  background: #2f2a24;
+  color: #f7f5f2;
+  padding: 10px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  margin-right: 8px;
+}
+
 button {
   background: #2f2a24;
   color: #f7f5f2;
