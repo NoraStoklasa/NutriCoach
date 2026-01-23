@@ -11,6 +11,7 @@ from recipes.recipe_database import (
     add_recipe_ingredient,
     update_recipe,
     replace_recipe_ingredients,
+    delete_recipe,
 )
 from ingredients.database import get_all_ingredient_names
 from logic.recalculate_nutrients import recalculate_nutrients
@@ -87,6 +88,9 @@ def list_recipes(request: Request):
     for recipe in recipes:
         recipes_by_category.setdefault(recipe[2], []).append(recipe)
 
+    for items in recipes_by_category.values():
+        items.sort(key=lambda item: item[1].lower())
+
     return templates.TemplateResponse(
         "recipes_list.html",
         {
@@ -118,6 +122,9 @@ def meal_plan(request: Request):
     }
     for recipe in recipes:
         recipes_by_category.setdefault(recipe[2], []).append(recipe)
+
+    for items in recipes_by_category.values():
+        items.sort(key=lambda item: item[1].lower())
 
     return templates.TemplateResponse(
         "meal_plan.html",
@@ -153,7 +160,7 @@ def create_recipe_post(
     )
 
     return RedirectResponse(
-        url=f"/recipes/{recipe_id}",
+        url=f"/recipes/{recipe_id}/edit",
         status_code=303,
     )
 
@@ -491,3 +498,9 @@ def update_recipe_post(
         url=f"/recipes/{recipe_id}",
         status_code=303,
     )
+
+
+@router.post("/{recipe_id}/delete")
+def delete_recipe_post(recipe_id: int):
+    delete_recipe(recipe_id)
+    return RedirectResponse(url="/recipes", status_code=303)

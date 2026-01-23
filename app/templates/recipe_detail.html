@@ -25,6 +25,9 @@
 
     <p>
       <a href="/recipes/{{ recipe_id }}/edit" class="button-link">Edit recipe</a>
+      <form method="post" action="/recipes/{{ recipe_id }}/delete" style="display:inline;">
+        <button type="submit">Delete recipe</button>
+      </form>
       <a href="/recipes" class="button-link">Back</a>
     </p>
 {% endblock %}

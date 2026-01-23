@@ -22,7 +22,7 @@ templates = Jinja2Templates(directory="app/templates")
 def list_ingredients(request: Request):
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id, name FROM ingredients ORDER by name")
+        cursor.execute("SELECT id, name FROM ingredients ORDER by lower(name)")
         ingredients = cursor.fetchall()
     return templates.TemplateResponse(
         "ingredients_list.html", {"request": request, "ingredients": ingredients}

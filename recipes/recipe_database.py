@@ -100,6 +100,19 @@ def replace_recipe_ingredients(recipe_id, ingredients):
         )
 
 
+def delete_recipe(recipe_id):
+    with sqlite3.connect(RECIPE_DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM recipe_ingredients WHERE recipe_id = ?",
+            (recipe_id,),
+        )
+        cursor.execute(
+            "DELETE FROM recipes WHERE id = ?",
+            (recipe_id,),
+        )
+
+
 def load_recipe(recipe_id):
     with sqlite3.connect(RECIPE_DB_PATH) as conn:
         cursor = conn.cursor()
